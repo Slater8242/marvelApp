@@ -1,5 +1,7 @@
 import { Component } from 'react';
 import MarvelServices from "../../services/MarvelServices";
+import Spinner from "../spinner/spinner";
+import ErrorMessage from '../errorMessage/errorMessage';
 
 import './randomChar.scss';
 import mjolnir from '../../resources/img/mjolnir.png';
@@ -11,47 +13,46 @@ class RandomChar extends Component {
     };
 
     state={
-        char:{}
+        char:{},
+        loading: true,
+        error:false
     };
 
     marvelServices = new MarvelServices();
 
     onCharLoaded=(char)=>{
-        this.setState({char:char})
+        this.setState({
+            char,
+            loading:false
+        })
+    };
+
+    onError=()=>{
+        this.setState({
+            loading:false,
+            error: true
+        })
     };
 
     updateChar = ()=>{
         const id = Math.floor(Math.random()*(1011400-1011000)+1011000);
         this.marvelServices
             .getCharacter(id)
-            .then(this.onCharLoaded);
+            .then(this.onCharLoaded)
+            .catch(this.onError);
     };
 
     render(){
-        let{char:{name,thumbnail,homepage,wiki}} = this.state;
-         
-        let description = "As the Norse God of thunder and ldescriptionightnAs the Norse God of thunder and ldescriptionightning, ing, Thor wields one of the greatest weapons ever made, the enchanted hammer Mjolnir. While others have described Thor as an over-muscled, oafish imbecile, he's quite smart and compassionate...";
-        console.log(description.length);
+        const{char,loading,error} = this.state;
+        const errorMessage = error?<ErrorMessage/> : null;
+        const spinner = loading?<Spinner/>: null;
+        const content = !(loading || error)? <View char={char}/>:null;
 
         return (
             <div className="randomchar">
-                <div className="randomchar__block">
-                    <img src={thumbnail} alt="Random character" className="randomchar__img"/>
-                    <div className="randomchar__info">
-                        <p className="randomchar__name">{name}</p>
-                        <p className="randomchar__descr">
-                            {description?description.substr(0,215)+"...":"There is no description provided"}
-                        </p>
-                        <div className="randomchar__btns">
-                            <a href={homepage} className="button button__main">
-                                <div className="inner">homepage</div>
-                            </a>
-                            <a href={wiki} className="button button__secondary">
-                                <div className="inner">Wiki</div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                {errorMessage}
+                {spinner}
+                {content}
                 <div className="randomchar__static">
                     <p className="randomchar__title">
                         Random character for today!<br/>
@@ -69,5 +70,28 @@ class RandomChar extends Component {
         )
     }
 }
+
+const View=({char})=>{
+    const{name,description,thumbnail,homepage,wiki}= char;
+    return(
+        <div className="randomchar__block">
+            <img src={thumbnail} alt="Random character" className="randomchar__img"/>
+            <div className="randomchar__info">
+                <p className="randomchar__name">{name}</p>
+                <p className="randomchar__descr">
+                    {description?description.substr(0,215)+"...":"There is no description provided"}
+                </p>
+                <div className="randomchar__btns">
+                    <a href={homepage} className="button button__main">
+                        <div className="inner">homepage</div>
+                    </a>
+                    <a href={wiki} className="button button__secondary">
+                        <div className="inner">Wiki</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    )
+};
 
 export default RandomChar;
