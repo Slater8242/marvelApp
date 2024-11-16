@@ -3,31 +3,36 @@ import { useState,useEffect } from 'react';
 import useMarvelServices from '../../services/MarvelServices';
 import Spinner from '../spinner/spinner';
 import ErrorMessage from '../errorMessage/errorMessage';
-
+import "./singleComicsPage.scss"
 
 const SingleComicPage = () => {
-    const {comicId} = useParams();
-    const [comic,setComic] = useState(null);
+    const {comicId, charName} = useParams();
+    const [data,setData] = useState(null);
     
-    const {loading,error,getComic,clearError}= useMarvelServices();
+    const {loading,error,getComic,getCharacterByName,clearError}= useMarvelServices();
 
     useEffect(()=>{
-        updateComic(comicId);
-    },[comicId]);
+        updateComic();
+    },[comicId || charName]);
 
     const updateComic = ()=>{
         clearError();
-        getComic(comicId)
-            .then(onComicLoaded)
+        if (comicId) {
+            getComic(comicId)
+                .then(onDataLoaded)
+        } else if (charName) {
+            getCharacterByName(charName)
+                .then(onDataLoaded)
+        }
     };
-
-    const onComicLoaded=(comic)=>{
-        setComic(comic)
+    
+    const onDataLoaded=(data)=>{
+        setData(data)
     };
 
     const errorMessage = error?<ErrorMessage/> : null;
     const spinner = loading?<Spinner/>: null;
-    const content = !(loading || error|| !comic)? <ComicView comic={comic}/>:null;
+    const content = !(loading || error|| !data)? <DataView data={data}/>:null;
 
     return (
         <>
@@ -38,21 +43,24 @@ const SingleComicPage = () => {
     )
 }
 
-const ComicView = ({comic})=>{
-    console.log(comic);
-    const {title,description,pageCount,thumbnail,price} = comic;
-
+const DataView = ({data})=>{
+    const {title,description,pageCount,thumbnail,price,name} = data;
+        
     return(
-        <div className="single-comic">
-            <img src={thumbnail} alt={title} className="single-comic__img"/>
-            <div className="single-comic__info">
-                <h2 className="single-comic__name">{title}</h2>
-                <p className="single-comic__descr">{description}</p>
-                <p className="single-comic__descr">{pageCount}</p>
-                <p className="single-comic__descr">Language: en-us</p>
-                <div className="single-comic__price">{price}</div>
+        <div className="data">
+            <img src={thumbnail} alt={title} className="data__img"/>
+            <div className="data__info">
+                <h2 className="data__name">{title || name}</h2>
+                <p className="data__descr">{description}</p>
+                <p className="data__descr">{pageCount}</p>
+                <p className="data__descr">Language: en-us</p>
+                <div className="data__price">{price}</div>
             </div>
-            <Link to="/comics" className="single-comic__back">Back to all</Link>
+            <Link to={name ? "/" : "/comics"} className="data__back">
+                <button className="button button__main">
+                    <div className="inner" bis_skin_checked="1">Back to all</div>
+                </button>
+            </Link>
         </div>
     )
 };

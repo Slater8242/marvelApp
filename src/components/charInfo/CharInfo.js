@@ -48,6 +48,9 @@ const CharInfo=(props)=> {
 
 const View =({char})=>{
     const{name,description,thumbnail,homepage,wiki,comics} = char;
+    console.log(wiki);
+    console.log(homepage);
+    
     const comicsZero =()=>{
         if (comics.length ===0) {
             return(
