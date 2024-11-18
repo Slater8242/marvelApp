@@ -1,5 +1,6 @@
 import { useParams ,Link} from 'react-router-dom';
 import { useState,useEffect } from 'react';
+import { Helmet } from 'react-helmet';
 import useMarvelServices from '../../services/MarvelServices';
 import Spinner from '../spinner/spinner';
 import ErrorMessage from '../errorMessage/errorMessage';
@@ -48,6 +49,13 @@ const DataView = ({data})=>{
         
     return(
         <div className="data">
+            <Helmet>
+                <meta
+                    name="description"
+                    content={`${title || name} comics book`}
+                />
+                <title>{title || name}</title>
+            </Helmet>
             <img src={thumbnail} alt={title} className="data__img"/>
             <div className="data__info">
                 <h2 className="data__name">{title || name}</h2>
